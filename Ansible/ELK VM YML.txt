@@ -1,0 +1,51 @@
+﻿---
+ - name: Config elk VM with Docker
+   hosts: elk
+   remote_user: RedAdmin
+   become: true
+   tasks:
+
+
+   - name: Use more memory
+         ansible.posix.sysctl:
+           name: vm.max_map_count
+           value: '262144'
+           state: present
+           reload: yes
+
+
+   - name: docker.io
+         apt:
+           update_cache: yes
+           name: docker.io
+           state: present
+
+
+   - name: Install pthon3-pip
+         apt:
+           name: python3-pip
+           state: present
+
+
+   - name: Install Docker Python pip module
+         pip:
+           name: docker
+           state: present
+
+
+   - name: Download and Launch Docker ELK Container
+         docker_container:
+           name: elk
+           image: sebp/elk:761
+           state: present
+           restart_policy: always
+           published_ports:
+             - 5601:5601
+             - 9200:9200
+             - 5044:5044
+
+
+   - name: Enable service docker on boot
+         systemd:
+           name: docker
+           enabled: yes
